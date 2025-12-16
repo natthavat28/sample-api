@@ -1,4 +1,5 @@
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using Refit;
 
 namespace sample_api
@@ -9,8 +10,13 @@ namespace sample_api
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+            builder.Services.AddHealthChecks();
+
             // Add services to the container.
             builder.Services.AddOpenTelemetry()
+            .ConfigureResource(r => r.AddService("sample-api"))
             .WithMetrics(builder =>
             {
                 builder
@@ -32,32 +38,21 @@ namespace sample_api
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            
 
             builder.Services.AddRefitClient<ISampleExternalApiCaller>()
                 .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://api.restful-api.dev"));
 
-            builder.Services.AddHealthChecks();
-
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
+            app.UseSwagger();
+            app.UseSwaggerUI();
             app.UseOpenTelemetryPrometheusScrapingEndpoint();
-
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
-
             app.UseHttpsRedirection();
-
+            app.UseRouting();
             app.UseAuthorization();
-
-
             app.MapControllers();
-
             app.Run();
         }
     }
