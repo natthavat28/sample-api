@@ -62,6 +62,8 @@ namespace sample_api
 
             builder.Services.AddRefitClient<ISampleExternalApiCaller>()
                 .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://api.restful-api.dev"));
+            builder.Services.AddRefitClient<IBeeceptorApiCaller>()
+                .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://mp106b24be2fa7732b50.free.beeceptor.com"));
 
             var app = builder.Build();
 
